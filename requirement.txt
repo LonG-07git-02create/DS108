@@ -1,0 +1,26 @@
+# Data Scraping & Browser Automation
+selenium
+undetected-chromedriver
+requests
+beautifulsoup4
+
+# Data Manipulation & Coordinate Transformation
+pandas
+numpy
+scipy
+
+# Data Visualization
+matplotlib
+seaborn
+plotly
+wordcloud
+
+# Machine Learning & Statistical Analysis
+scikit-learn
+xgboost
+lightgbm
+statsmodels
+
+# Notebook Environment
+notebook
+ipykernel
