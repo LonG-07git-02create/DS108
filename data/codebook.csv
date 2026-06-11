@@ -1,0 +1,27 @@
+﻿Variable Name,Data Type,Allowed Values / Range,Missing Data,Unit,Description
+Diện tích,float64,Range: [1.0 -> 990.0],0 rows (0.0%),m2,The total land area of the property.
+Số phòng ngủ,float64,Range: [1.0 -> 100.0],0 rows (0.0%),Rooms,The number of bedrooms in the property.
+"Số phòng tắm, vệ sinh",float64,Range: [1.0 -> 80.0],0 rows (0.0%),Rooms,The number of bathrooms/toilets in the property.
+Số tầng,float64,Range: [1.0 -> 14.0],0 rows (0.0%),Floors,Total number of floors/stories of the building.
+Đường vào,float64,Range: [1.0 -> 50.0],0 rows (0.0%),m ,Numeric width of the access road or alley immediately preceding the house
+Pháp lý,object,"Categorical (3 categories): ['Sổ hồng', 'Sổ đỏ', 'không có']",0 rows (0.0%),,Legal ownership documentation status of the property.
+Nội thất,object,"Categorical (4 categories): ['Trống / Nhà thô', 'Cơ bản', 'Đầy đủ', 'Cao cấp']",0 rows (0.0%),,The condition or furnishing level of the interior.
+Latitude,float64,Range: [10.385303700155749 -> 11.0159637091837],0 rows (0.0%),Degrees,Geographic latitude coordinate of the property location.
+Longitude,float64,Range: [106.427824486395 -> 106.972915062961],0 rows (0.0%),Degrees,Geographic longitude coordinate of the property location.
+Quan_Huyen,object,"Categorical (24 categories). e.g., ['Quận Gò Vấp', 'Huyện Nhà Bè', 'Quận 1']...",0 rows (0.0%),,The district where the property is located.
+Phuong_Xa,object,"Categorical (153 categories). e.g., ['Phường 15', 'Thị trấn Nhà Bè', 'Phường Tân Định']...",0 rows (0.0%),,The ward where the property is located.
+Dien_Tich_Lo,float64,Range: [8.9 -> 1117149.9],1187 rows (20.4%),m2,Statutorily registered total plot area according to the government land registry 
+hem_xe_hoi,int64,Range: [0 -> 1],0 rows (0.0%),,A binary indicator specifying whether the property is located in an alley accessible by cars.
+gan_cho_sieu_thi,int64,Range: [0 -> 1],0 rows (0.0%),,A binary indicator specifying the presence of a market or supermarket near the property.
+gan_truong_hoc,int64,Range: [0 -> 1],0 rows (0.0%),,A binary indicator specifying the presence of a market or supermarket near the property.
+gan_benh_vien,int64,Range: [0 -> 1],0 rows (0.0%),,A binary indicator specifying the presence of a hospital or medical center near the property.
+gan_cong_vien_ho_nuoc,int64,Range: [0 -> 1],0 rows (0.0%),,"A binary indicator specifying the presence of a park, lake, or water body near the property."
+duong_vao_null_flag,int64,Range: [0 -> 1],0 rows (0.0%),,A binary missing indicator flag specifying whether the original entrance road data was missing (Null/NaN) prior to data imputation.
+Duong,object,"Categorical (1002 categories). e.g., ['Đường Lê Đức Thọ', 'Đường Huỳnh Tấn Phát', 'Đường Thạch Thị Thanh']...",354 rows (6.1%),,The name of the street where the property is located.
+Ty_Le_Giao_Thong,float64,Range: [0.0 -> 100.0],1196 rows (20.6%),%,The percentage of land zoned for traffic and transportation infrastructure within the planning parcel/block of the property.
+Ty_Le_Cong_Cong_CX,float64,Range: [0.0 -> 100.0],1196 rows (20.6%),%,The percentage of land zoned for public facilities and greenery/parks within the planning parcel/block of the property.
+Ty_Le_Khac,float64,Range: [0.0 -> 100.0],1196 rows (20.6%),%,The percentage of land zoned for residential use within the planning parcel/block of the property.
+Ty_Le_Dat_O,float64,Range: [0.0 -> 100.0],1196 rows (20.6%),%,The percentage of land zoned for other/miscellaneous purposes within the planning parcel/block of the property.
+Tổng số phòng,float64,Range: [2.0 -> 160.0],0 rows (0.0%),Rooms,"Total number of rooms inside the house (sum of bedrooms, living rooms, etc.)."
+khoang_cach_trung_tam,float64,Range: [0.01463035023166 -> 49.94338074237805],0 rows (0.0%),km,Calculated geodesic distance to the city center (using Haversine formula).
+Khoảng giá,float64,Range: [0.33 -> 700.0],0 rows (0.0%),Billions of VND,The listed selling price of the property.
