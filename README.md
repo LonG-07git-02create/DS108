@@ -1,16 +1,16 @@
-# DS108 — Dự báo Khoảng giá Bất động sản TP.HCM
+# DS108 — HCMC Real Estate Price Prediction
 
-Dự án xây dựng pipeline hoàn chỉnh để thu thập, làm sạch, tiền xử lý và mô hình hóa dữ liệu bất động sản tại TP.HCM, với mục tiêu phân loại khoảng giá (`Khoảng giá`) của từng căn nhà.
+An end-to-end pipeline for collecting, cleaning, preprocessing, and modeling real estate data in Ho Chi Minh City, with the goal of classifying the price range (`Khoảng giá`) of each property.
 
 ---
 
-## Cấu trúc thư mục
+## Directory Structure
 
 ```
 DS108/
 ├── data/
-│   └── raw/                          # Dữ liệu thô thu thập được
-│   └── processed/                    # Dữ liệu sau xử lý
+│   └── raw/                          # Raw collected data
+│   └── processed/                    # Processed data
 ├── notebook/
 │   ├── 01_0_bds_crawler_clean.ipynb
 │   ├── 01_1_quyhoach_crawler_clean.ipynb
@@ -19,121 +19,121 @@ DS108/
 │   ├── 02_2_data_transformation_linear.ipynb
 │   ├── 03_eda_and_feature_selection.ipynb
 │   └── 04_modeling.ipynb
-├── data_output/                    # Dữ liệu đầu ra sau từng bước xử lý
+├── data_output/                    # Output data after each step
 ├── requirement.txt
 └── README.md
 ```
 
 ---
 
-## Thứ tự chạy Pipeline
+## Pipeline Execution Order
 
-Pipeline được tổ chức theo thứ tự tuyến tính, rẽ nhánh ở bước tiền xử lý rồi hội tụ về bước huấn luyện mô hình:
+The pipeline follows a linear order, branching at the preprocessing step and converging at the model training step:
 
 ```
-01_0  →  01_1  →  02_0  →┬→  02_1  →  03 (nhánh Tree)    →┐
-                           └→  02_2  →  03 (nhánh Linear)  →┘→  04
+01_0  →  01_1  →  02_0  →┬→  02_1  →  03 (Tree branch)   →┐
+                           └→  02_2  →  03 (Linear branch) →┘→  04
 ```
 
-> **Lưu ý:** File `03_eda_and_feature_selection.ipynb` được chạy **lần lượt cho từng nhánh** (Tree và Linear) và `04_modeling.ipynb` được chạy bằng output của cả hai nhánh 02_1 và 02_2.
+> **Note:** `03_eda_and_feature_selection.ipynb` is run **separately for each branch** (Tree and Linear), and `04_modeling.ipynb` uses outputs from both branches 02_1 and 02_2.
 
 ---
 
-## Mô tả các Notebook
+## Notebook Descriptions
 
-### 1. Thu thập dữ liệu
+### 1. Data Collection
 
-#### `01_0_bds_crawler_clean.ipynb` — Thu thập dữ liệu bất động sản
-- Crawl dữ liệu rao bán nhà đất từ các trang web bất động sản.
-- Làm sạch sơ bộ dữ liệu thô: loại bỏ bản ghi trùng lặp, chuẩn hóa định dạng.
-- **Output:** dữ liệu BĐS thô đã làm sạch ban đầu.
+#### `01_0_bds_crawler_clean.ipynb` — Real Estate Data Scraping
+- Scrapes property listings from real estate websites.
+- Preliminary cleaning of raw data: removes duplicates, standardizes formats.
+- **Output:** initial cleaned raw real estate data.
 
-#### `01_1_quyhoach_crawler_clean.ipynb` — Thu thập dữ liệu quy hoạch
-- Crawl dữ liệu quy hoạch sử dụng đất tại TP.HCM (tỷ lệ đất ở, đất giao thông, công viên, v.v.).
-- Kết hợp thông tin quy hoạch theo tọa độ địa lý vào dữ liệu BĐS.
-- **Output:** dữ liệu đã được bổ sung các đặc trưng quy hoạch.
+#### `01_1_quyhoach_crawler_clean.ipynb` — Urban Planning Data Scraping
+- Scrapes land-use planning data in HCMC (residential ratio, transport ratio, park ratio, etc.).
+- Merges planning information by geographic coordinates into the real estate dataset.
+- **Output:** data enriched with planning features.
 
 ---
 
-### 2. Làm sạch & Tiền xử lý
+### 2. Cleaning & Preprocessing
 
-#### `02_0_data_cleaning.ipynb` — Làm sạch & Kỹ thuật đặc trưng
-- Chuẩn hóa miền giá trị các biến phân loại (`Pháp lý`, `Nội thất`, `Hướng nhà`, v.v.).
-- Xử lý đơn vị (`Diện tích`, `Đường vào`, ...) và loại bỏ outlier.
-- Kỹ thuật đặc trưng (feature engineering): tạo thêm `total_rooms`, `distance_to_center`, `hem_xe_hoi`, các cờ `gan_*` (gần chợ, trường học, bệnh viện, công viên).
-- Tách train/test theo tỷ lệ cố định.
+#### `02_0_data_cleaning.ipynb` — Data Cleaning & Feature Engineering
+- Standardizes categorical variable domains (`Pháp lý`, `Nội thất`, `Hướng nhà`, etc.).
+- Handles units (`Diện tích`, `Đường vào`, ...) and removes outliers.
+- Feature engineering: creates `total_rooms`, `distance_to_center`, `hem_xe_hoi`, `gan_*` flags (near market, school, hospital, park).
+- Splits train/test at a fixed ratio.
 - **Output:** `data_output/1_data_cleaned_train.csv`, `data_output/1_data_cleaned_test.csv`
 
-> Từ đây, pipeline **tách thành 2 nhánh độc lập** tùy theo loại mô hình sẽ sử dụng ở bước sau.
+> From this point, the pipeline **splits into 2 independent branches** depending on the model type used in the next step.
 
 ---
 
-#### Nhánh A — Dành cho mô hình dựa trên Cây quyết định (Tree-based)
+#### Branch A — For Tree-based Models
 
 ##### `02_1_data_transformation_tree.ipynb`
-- **Ordinal Encoding** cho `Pháp lý` và `Nội thất` (giữ nguyên thứ tự thứ hạng).
-- **Target Encoding** cho các biến địa chỉ (`Quận/Huyện`, `Phường/Xã`, `Tên đường`) với `smoothing` phù hợp để tránh overfitting.
-- Không cần chuẩn hóa (scaling) vì cây quyết định không nhạy cảm với thang đo.
+- **Ordinal Encoding** for `Pháp lý` and `Nội thất` (preserves ordinal ranking).
+- **Target Encoding** for address variables (`Quận/Huyện`, `Phường/Xã`, `Tên đường`) with appropriate smoothing to avoid overfitting.
+- No scaling required since decision trees are insensitive to scale.
 - **Output:** `data_output/2_data_preprocessed_tree_train.csv`, `data_output/2_data_preprocessed_tree_test.csv`
 
 ---
 
-#### Nhánh B — Dành cho mô hình tuyến tính (Linear-based)
+#### Branch B — For Linear-based Models
 
 ##### `02_2_data_transformation_linear.ipynb`
-- **Ordinal Encoding** cho `Pháp lý` và `Nội thất`.
-- **Target Encoding** cho các biến địa chỉ.
-- **Log Transform + StandardScaler** cho các đặc trưng số lệch phải nặng (`Diện tích`, `Đường vào`, `total_rooms`).
-- **MinMaxScaler / RobustScaler** cho các đặc trưng số khác.
-- Chuẩn bị dữ liệu đáp ứng giả định phân phối chuẩn của mô hình tuyến tính.
+- **Ordinal Encoding** for `Pháp lý` and `Nội thất`.
+- **Target Encoding** for address variables.
+- **Log Transform + StandardScaler** for heavily right-skewed numeric features (`Diện tích`, `Đường vào`, `total_rooms`).
+- **MinMaxScaler / RobustScaler** for other numeric features.
+- Prepares data to meet the normality assumptions of linear models.
 - **Output:** `data_output/2_data_preprocessed_linear_train.csv`, `data_output/2_data_preprocessed_linear_test.csv`
 
 ---
 
-### 3. EDA & Lựa chọn đặc trưng
+### 3. EDA & Feature Selection
 
-#### `03_eda_and_feature_selection.ipynb` *(chạy 2 lần, mỗi lần cho 1 nhánh)*
-- Phân tích phân phối, tương quan và mức độ quan trọng của đặc trưng.
-- Lựa chọn tập feature phù hợp với từng nhánh (tree hoặc linear).
-- Trực quan hóa phân phối biến mục tiêu (`Khoảng giá`).
-- **Input:** output của `02_1` hoặc `02_2` tương ứng.
-
----
-
-### 4. Mô hình hóa
-
-#### `04_modeling.ipynb` — Huấn luyện & Đánh giá mô hình
-- Huấn luyện các mô hình phân loại cho cả hai nhánh đã xử lý.
-- So sánh kết quả giữa tree-based và linear-based.
-- Đánh giá hiệu năng bằng các chỉ số: Accuracy, F1-Score, Confusion Matrix.
-- **Input:** output của bước `03` từ cả 2 nhánh.
+#### `03_eda_and_feature_selection.ipynb` *(run twice, once per branch)*
+- Analyzes distribution, correlation, and feature importance.
+- Selects the optimal feature set for each branch (tree or linear).
+- Visualizes target variable distribution (`Khoảng giá`).
+- **Input:** output from `02_1` or `02_2` respectively.
 
 ---
 
-## Cài đặt môi trường
+### 4. Modeling
+
+#### `04_modeling.ipynb` — Model Training & Evaluation
+- Trains classification models for both processed branches.
+- Compares results between tree-based and linear-based approaches.
+- Evaluates performance using: Accuracy, F1-Score, Confusion Matrix.
+- **Input:** output from step `03` of both branches.
+
+---
+
+## Environment Setup
 
 ```bash
 pip install -r requirement.txt
 ```
 
-Các thư viện chính được sử dụng trong dự án:
+Key libraries used in this project:
 
-- `pandas`, `numpy` — Xử lý dữ liệu
-- `scikit-learn` — Mô hình hóa & tiền xử lý
+- `pandas`, `numpy` — Data processing
+- `scikit-learn` — Modeling & preprocessing
 - `category_encoders` — Target Encoding
-- `matplotlib`, `seaborn`, `plotly` — Trực quan hóa
-- `scipy`, `statsmodels` — Phân tích thống kê
+- `matplotlib`, `seaborn`, `plotly` — Visualization
+- `scipy`, `statsmodels` — Statistical analysis
 
 ---
 
-## Biến mục tiêu
+## Target Variable
 
-`Khoảng giá` — Phân loại khoảng giá của bất động sản (bài toán phân loại đa lớp).
+`Khoảng giá` — Price range classification of real estate (multi-class classification problem).
 
 ---
 
-## Lưu ý khi chạy
+## Notes
 
-- Các notebook phải được chạy **theo đúng thứ tự** vì mỗi bước phụ thuộc vào output của bước trước.
-- Thư mục `data_output/` phải tồn tại trước khi chạy từ `02_0` trở đi.
-- Notebook `03` cần được chạy **riêng biệt hai lần**: một lần trỏ vào dữ liệu nhánh Tree, một lần trỏ vào dữ liệu nhánh Linear.
+- Notebooks must be run **in order** since each step depends on the output of the previous one.
+- The `data_output/` directory must exist before running from `02_0` onward.
+- Notebook `03` must be run **twice separately**: once pointing to the Tree branch data, once to the Linear branch data.
