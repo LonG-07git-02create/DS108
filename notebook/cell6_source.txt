@@ -1,0 +1,33 @@
+# ============================================================
+# CELL 6 — SCATTER PLOTS: KEY FEATURES VS TARGET
+# ============================================================
+SCATTER_FEATURES = [
+    "Diện tích", "Số tầng", "Đường vào",
+    "total_rooms", "khoang_cach_trung_tam", "Latitude",
+]
+
+scatter_cols = [c for c in SCATTER_FEATURES if c in df_train.columns]
+plot_data = df_train[scatter_cols + [TARGET_COL]].copy()
+plot_data = plot_data.apply(pd.to_numeric, errors="coerce").dropna()
+
+assert len(plot_data) > 0, "No valid rows for scatter plots"
+
+SCATTER_COLORS  = ["#1f77b4", "#ff7f0e", "#2ca02c", "#d62728", "#9467bd", "#8c564b"]
+SCATTER_LABELS  = ["(a)", "(b)", "(c)", "(d)", "(e)", "(f)"]
+
+fig, axes = plt.subplots(2, 3, figsize=(7.16, 4.5), dpi=300)
+axes = axes.flatten()
+
+for i, feature in enumerate(scatter_cols):
+    sns.scatterplot(
+        data=plot_data, x=feature, y=TARGET_COL,
+        color=SCATTER_COLORS[i], alpha=0.3, edgecolor="none", s=4, ax=axes[i],
+    )
+    axes[i].set_title(f"{SCATTER_LABELS[i]} {feature} vs {TARGET_COL}", loc="left", pad=6)
+    axes[i].set_xlabel(feature)
+    axes[i].set_ylabel(TARGET_COL if i % 3 == 0 else "")
+    axes[i].grid(axis="both", linestyle="--", linewidth=0.3, alpha=0.7)
+
+plt.tight_layout(w_pad=2.0, h_pad=1.5)
+#plt.savefig("scatter_plots_ieee.png", format="png", dpi=300, bbox_inches="tight")
+plt.show()

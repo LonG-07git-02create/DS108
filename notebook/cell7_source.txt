@@ -1,0 +1,40 @@
+# ============================================================
+# CELL 7 - FEATURE SELECTION: MUTUAL INFORMATION
+# ============================================================
+from sklearn.feature_selection import mutual_info_regression
+from sklearn.preprocessing import LabelEncoder
+
+COLS_TO_DROP = ["Số phòng ngủ", "Số phòng tắm, vệ sinh", "Ty_Le_Khac"]
+cols_to_drop_existing = [c for c in COLS_TO_DROP if c in df_train.columns]
+
+X_mi = df_train.drop(columns=[TARGET_COL] + cols_to_drop_existing).copy()
+y_mi = pd.to_numeric(df_train[TARGET_COL], errors="coerce")
+
+for col in X_mi.select_dtypes(include="number").columns:
+    X_mi[col] = X_mi[col].fillna(X_mi[col].median())
+
+for col in X_mi.select_dtypes(include=["object", "category"]).columns:
+    X_mi[col] = X_mi[col].fillna("Unknown")
+    X_mi[col] = LabelEncoder().fit_transform(X_mi[col])
+
+discrete_mask = X_mi.dtypes == int
+# Exclude columns where any value appears < 4 times to avoid KDTree crash
+for col in X_mi.columns[discrete_mask]:
+    if X_mi[col].value_counts().min() < 4:
+        discrete_mask[col] = False
+
+mi_scores = mutual_info_regression(X_mi, y_mi, discrete_features=discrete_mask, random_state=42)
+mi_series = pd.Series(mi_scores, index=X_mi.columns, name="MI Score").sort_values(ascending=False)
+
+assert len(mi_series) > 0, "MI scores are empty"
+
+plt.figure(figsize=(10, 8))
+sns.barplot(x=mi_series.values, y=mi_series.index, palette="viridis")
+plt.title("Feature Importance - Mutual Information", fontsize=14, fontweight="bold", pad=15)
+plt.xlabel("Mutual Information Score")
+plt.ylabel("Feature")
+plt.grid(axis="x", linestyle="--", alpha=0.7)
+plt.tight_layout()
+plt.show()
+
+print(mi_series.to_frame().round(4).to_string())
