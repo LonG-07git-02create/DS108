@@ -30,4 +30,153 @@ The implementation process is divided into stages corresponding to the Jupyter N
 ### Step 1: Install necessary libraries
 Open Terminal/Command Prompt in the project's directory and run the following command to automatically install the entire environment:
 ```bash
-pip install -r requirements.txt
+pip install -r requirement.txt
+```
+
+### Step 2: Run notebooks in order
+Navigate to the `notebooks/` folder and execute:
+```bash
+jupyter notebook notebooks/
+```
+
+Run the notebooks in the numbered order (01 → 02 → 03 → 04) to ensure data continuity through the pipeline.
+
+### Step 3: Launch the Streamlit web app
+```bash
+streamlit run app/app.py
+```
+
+### Step 4 (Optional): Docker deployment
+```bash
+docker build -t ds108 .
+docker run -p 8501:8501 ds108
+```
+
+---
+
+## 📂 Updated Project Structure
+
+```
+DS108/
+├── app/
+│   ├── app.py                    # Streamlit dashboard (EDA + price prediction)
+│   └── utils.py                  # Model & data loading, prediction logic
+├── data/
+│   ├── raw/
+│   │   └── Final_Merged_2605_quyhoach.csv
+│   ├── processed/                # Cleaned train/test CSVs
+│   └── codebook.csv              # Variable definitions & allowed values
+├── data_output/                  # Notebook output CSVs
+├── models/
+│   ├── model.pkl                 # Trained model
+│   └── features.pkl              # Feature columns for inference
+├── notebooks/
+│   ├── 01_0_bds_crawler.ipynb
+│   ├── 01_0_bds_crawler_clean.ipynb
+│   ├── 01_1_quyhoach_crawler.ipynb
+│   ├── 01_1_quyhoach_crawler_clean.ipynb
+│   ├── 02_0_data_cleaning.ipynb
+│   ├── 02_0_data_cleaning_executed.ipynb
+│   ├── 02_1_data_imputation_tree.ipynb
+│   ├── 02_2_data_imputation_linear.ipynb
+│   ├── 03_eda_and_feature_selection.ipynb
+│   ├── 04_modeling.ipynb
+│   ├── 04_modeling_clean.ipynb
+│   ├── LLM_test/                 # Experimental LLM notebooks
+│   │   ├── mistral_7b.ipynb
+│   │   ├── qwen_3b.ipynb
+│   │   ├── qwen_7b.ipynb
+│   │   └── yi_1.5_6b_chat.ipynb
+│   ├── env.example               # Environment template for crawlers
+│   └── data_output/              # Generated CSVs from notebooks
+├── data_cleaning_pipeline.ipynb  # Standalone OOP cleaning pipeline
+├── Dockerfile
+├── requirement.txt
+└── README.md
+```
+
+---
+
+## 🔬 Modeling Details
+
+The project evaluates **8 models** across two separate preprocessing pipelines:
+
+| Model | Type | Preprocessing |
+|-------|------|---------------|
+| Random Forest | Tree-based | Tree pipeline (Ordinal encoding) |
+| Gradient Boosting | Tree-based | Tree pipeline |
+| XGBoost | Tree-based | Tree pipeline |
+| LightGBM | Tree-based | Tree pipeline |
+| Linear Regression | Linear | Linear pipeline (OneHot + Scaling + log1p) |
+| Ridge Regression | Linear | Linear pipeline |
+| Lasso Regression | Linear | Linear pipeline |
+| ElasticNet | Linear | Linear pipeline |
+
+**Target variable:** `Khoảng giá` (billions VND)
+
+**Evaluation metrics:** R² Score, MAE, MSE, MAPE, RMSLE
+
+---
+
+## 📊 Web App Features
+
+Run `streamlit run app/app.py` to open the dashboard with two tabs:
+
+1. **Trực quan hóa EDA** (EDA Visualization)
+   - District filter
+   - Price distribution histogram (with KDE)
+   - Scatter plot: area vs. price by land type
+   - Key metrics cards (total listings, average price, unique land types)
+
+2. **Dự báo Giá BĐS** (Price Prediction)
+   - Input: area, district, land type, number of amenities
+   - Output: predicted price in billions VND
+   - Powered by the trained model loaded from `models/model.pkl`
+
+---
+
+## 🗂️ Data Codebook
+
+Key variables from `data/codebook.csv`:
+
+| Variable | Type | Description |
+|----------|------|-------------|
+| `Diện tích` | float | Land area (m²), range [1 — 990] |
+| `Khoảng giá` | float | **Target** — price in billions VND |
+| `Số phòng ngủ` | float | Bedrooms [1 — 100] |
+| `Pháp lý` | object | Legal status: Sổ hồng / Sổ đỏ / không có |
+| `Nội thất` | object | Interior: Trống / Cơ bản / Đầy đủ / Cao cấp |
+| `Quan_Huyen` | object | District (24 categories) |
+| `Dien_Tich_Lo` | float | Registered plot area (m²), 20.4% missing |
+| `Ty_Le_Dat_O` | float | % residential planning zone, 20.6% missing |
+| `Ty_Le_Giao_Thong` | float | % transport planning zone, 20.6% missing |
+| `khoang_cach_trung_tam` | float | Distance to city center (km) |
+
+---
+
+## 📦 Dependencies
+
+All required packages are listed in `requirement.txt`:
+
+- **Scraping:** selenium, undetected-chromedriver, requests, beautifulsoup4
+- **Data:** pandas, numpy, scipy
+- **Visualization:** matplotlib, seaborn, plotly
+- **ML:** scikit-learn, xgboost, lightgbm, category-encoders, statsmodels
+- **App:** streamlit, joblib
+- **Utilities:** tqdm, python-dotenv
+- **LLM:** openai, torch, transformers
+- **Notebook:** notebook, ipykernel
+
+---
+
+## 🔧 Environment Variables
+
+For the crawler notebooks, copy `notebooks/env.example` to `.env`:
+
+```bash
+BASE_URL=https://batdongsan.com.vn/ban-nha-dat-tp-hcm
+TARGET_SAMPLES=3500
+PAGE_DELAY=2
+CLOUDFLARE_TIMEOUT=30
+# ... see env.example for full list
+```
