@@ -13,13 +13,26 @@ scipy
 matplotlib
 seaborn
 plotly
-wordcloud
 
 # Machine Learning & Statistical Analysis
 scikit-learn
 xgboost
 lightgbm
+category-encoders
 statsmodels
+
+# Web App
+streamlit
+joblib
+
+# Utilities
+tqdm
+python-dotenv
+
+# AI / LLM
+openai
+torch
+transformers
 
 # Notebook Environment
 notebook
